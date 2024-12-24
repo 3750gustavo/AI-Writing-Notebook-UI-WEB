@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Co-Writing App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --md-ref-typeface-brand: 'Google Sans', sans-serif;
+            --md-ref-typeface-plain: 'Roboto', sans-serif;
+            --md-sys-color-outline-variant: #C4C6CF;
+        }
+        .default-light {
+            --md-sys-color-primary: #0077c8;
+            --md-sys-color-primary-container: #d7e2ff;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-on-primary-container: #001e35;
+            --md-sys-color-secondary: #555f71;
+            --md-sys-color-secondary-container: #d9e2f9;
+            --md-sys-color-on-secondary: #ffffff;
+            --md-sys-color-on-secondary-container: #121c2b;
+            --md-sys-color-background: #fefbff;
+            --md-sys-color-on-background: #1b1b1f;
+            --md-sys-color-surface: #fefbff;
+            --md-sys-color-on-surface: #1b1b1f;
+            --md-sys-color-surface-variant: #e0e2ec;
+            --md-sys-color-on-surface-variant: #44474e;
+            --md-sys-color-outline: #74777f;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-surface-container: #f2f4fc;
+            --md-sys-color-surface-container-highest: #e6e8f1;
+            --md-sys-color-surface-bright: #fefbff;
+            --md-sys-color-inverse-surface: #2f3033;
+            --md-sys-color-inverse-on-surface: #f1f0f4;
+        }
+        .default-dark {
+            --md-sys-color-primary: #a9c7ff;
+            --md-sys-color-primary-container: #004f9e;
+            --md-sys-color-on-primary: #002a4d;
+            --md-sys-color-on-primary-container: #d7e2ff;
+            --md-sys-color-secondary: #bdc6dc;
+            --md-sys-color-secondary-container: #3d4859;
+            --md-sys-color-on-secondary: #273141;
+            --md-sys-color-on-secondary-container: #d9e2f9;
+            --md-sys-color-background: #1b1b1f;
+            --md-sys-color-on-background: #e3e2e6;
+            --md-sys-color-surface: #1b1b1f;
+            --md-sys-color-on-surface: #e3e2e6;
+            --md-sys-color-surface-variant: #44474e;
+            --md-sys-color-on-surface-variant: #c4c6cf;
+            --md-sys-color-outline: #8e9099;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-surface-container: #272b30;
+            --md-sys-color-surface-container-highest: #353940;
+            --md-sys-color-surface-bright: #383b43;
+            --md-sys-color-inverse-surface: #e3e2e6;
+            --md-sys-color-inverse-on-surface: #2f3033;
+        }
+        .highlight {
+            color: cyan; /* Default dark mode color */
+        }
+        body, .dialog-input, .dialog-button, .prompt-textbox, .list-item-input, .parameter-input, .parameter-input-checkbox {
+            font: 400 14px/1.5 var(--md-ref-typeface-plain);
+        }
+        body {
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            border-radius: 24px;
+            background: var(--md-sys-color-surface);
+            box-shadow: 0 4px 6px -6px var(--md-sys-color-shadow);
+            position: relative;
+            z-index: 1;
+        }
+        .header {
+            position: -webkit-sticky; /* For Safari */
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: var(--md-sys-color-surface);
+            border-radius: 24px;
+            z-index: 10;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            margin-right: auto;
+            order: 1;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            order: 2;
+        }
+        .model-select {
+            background: none;
+            border: none;
+            font-family: var(--md-ref-typeface-plain);
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface);
+            margin-left: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2344474E' d='M1.41 0L6 4.58L10.59 0L12 1.41L6 7.41L0 1.41z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px 8px;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 20px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            text-align: center;
+            border-radius: 12px;
+            padding: 8px 16px;
+            position: absolute;
+            z-index: 11;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transform: translateY(10px);
+        }
+        .tooltip .tooltiptext.top {
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            transform: translateY(-10px);
+        }
+        .tooltip .tooltiptext.bottom {
+            top: 125%;
+            left: 50%;
+            margin-left: -60px;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+        .header button {
+            margin-left: 10px;
+            padding: 8px;
+            border-radius: 20px;
+            width: 40px;
+            height: 40px;
+        }
+        button:hover {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        button:active {
+            background-color: var(--md-sys-color-secondary-container);
+        }
+        button i {
+            color: var(--md-sys-color-on-surface);
+            font-size: 20px;
+        }
+        .text-area {
+            flex-grow: 1;
+            margin-top: 60px; /* Adjust based on header height */
+            padding: 20px;
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: 24px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .text-area::-webkit-scrollbar {
+            width: 12px;
+        }
+        .text-area::-webkit-scrollbar-track {
+            background: var(--md-sys-color-outline-variant);
+            border-radius: 20px;
+        }
+        .text-area::-webkit-scrollbar-thumb {
+            background-color: var(--md-sys-color-outline);
+            border-radius: 20px;
+            border: 3px solid var(--md-sys-color-outline-variant);
+        }
+        .text-area::-webkit-scrollbar-thumb:hover {
+            background-color: var(--md-sys-color-on-surface-variant);
+        }
+        @supports (scrollbar-color: red blue) {
+            .text-area {
+                scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-outline-variant);
+                scrollbar-width: thin;
+            }
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .action-buttons button {
+            margin-left: 10px;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-primary);
+            background-color: var(--md-sys-color-primary);
+        }
+        .action-buttons button:disabled {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            cursor: not-allowed;
+        }
+        .dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--md-sys-color-surface);
+            border-radius: 28px;
+            box-shadow: 0px 4px 16px var(--md-sys-color-shadow);
+            z-index: 100;
+            display: none;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+            max-height: 90vh; /* Ensure dialog doesn't exceed viewport height */
+            overflow-y: auto;
+        }
+        .dialog.open {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .dialog-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 24px 0 24px;
+        }
+        .dialog-title {
+            font-size: 22px;
+            color: var(--md-sys-color-on-surface);
+        }
+        .dialog-content-scrollable {
+            overflow-y: auto;
+            padding: 16px 24px;
+            max-height: calc(100vh - 200px); /* Adjust based on your layout */
+        }
+        .dialog-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .dialog-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 24px 24px 24px;
+        }
+        .dialog-input {
+            padding: 12px 16px;
+        }
+        .dialog-button {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            padding: 16px 24px; /* Increased padding */
+            border-radius: 24px; /* Slightly larger border radius */
+            font-weight: 500;
+        }
+        .dialog-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--md-sys-color-on-surface);
+            padding: 8px;
+            border-radius: 20px;
+            width: 40px;
+            height: 40px;
+        }
+        .parameter-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .parameter-label {
+            flex: 1;
+            margin-right: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+        }
+        .parameter-input {
+            flex: 0 0 100px; /* Slightly larger width */
+            margin-right: 16px;
+            padding: 12px 16px; /* Increased padding */
+        }
+        .snackbar-container {
+            position: fixed;
+            top: env(safe-area-inset-top, 20px); /* Account for iOS notches */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .snackbar {
+            display: flex;
+            align-items: center;
+            background-color: var(--md-sys-color-surface-container-highest);
+            color: var(--md-sys-color-on-surface);
+            padding: 12px 16px;
+            border-radius: 24px;
+            box-shadow: 0px 4px 16px var(--md-sys-color-shadow);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(-20px);
+            width: auto;
+            max-width: 500px;
+        }
+        .snackbar.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .snackbar.hide {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .snackbar-content {
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .snackbar-icon {
+            font-size: 20px;
+        }
+        .snackbar-message {
+            line-height: 1.5;
+        }
+        .snackbar-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+            color: var(--md-sys-color-on-surface);
+        }
+        .snackbar-close:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .snackbar-close:active {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        .snackbar-close i {
+            font-size: 16px;
+            pointer-events: none;
+        }
+        .snackbar-icon-info {
+            color: var(--md-sys-color-primary);
+        }
+        .snackbar-icon-error {
+            color: #d32f2f;
+        }
+        .snackbar-icon-success {
+            color: #2e7d32;
+        }
+        .snackbar-icon-warning {
+            color: #ed6c02;
+        }
+        .preset-dropdown {
+            margin-bottom: 20px;
+        }
+        .preset-dropdown select {
+            padding: 12px 16px;
+            border-radius: 20px;
+            border: none;
+            background-color: var(--md-sys-color-surface-container);
+            color: var(--md-sys-color-on-surface);
+            font-family: var(--md-ref-typeface-plain);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .preset-dropdown select:focus {
+            box-shadow: 0px 0px 0px 2px var(--md-sys-color-primary);
+            outline: none;
+        }
+        .preset-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .preset-actions button {
+            padding: 16px 24px; /* Increased padding */
+            border-radius: 24px; /* Slightly larger border radius */
+            font-weight: 500;
+            color: var(--md-sys-color-on-primary);
+            background-color: var(--md-sys-color-primary);
+        }
+        .preset-actions button:disabled {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            cursor: not-allowed;
+        }
+        .preset-create {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .preset-create button {
+            padding: 16px 24px; /* Increased padding */
+            border-radius: 24px; /* Slightly larger border radius */
+            font-weight: 500;
+            color: var(--md-sys-color-on-primary);
+            background-color: var(--md-sys-color-primary);
+            cursor: pointer;
+        }
+        .preset-create button:disabled {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            cursor: not-allowed;
+        }
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px;
+            }
+
+            .header-left,
+            .header-right {
+                margin-bottom: 10px;
+            }
+
+            .model-select {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            .text-area {
+                margin-top: 60px; /* Adjust based on header height */
+            }
+
+            .dialog-content-scrollable {
+                max-height: calc(100vh - 150px); /* Adjust for mobile dialog */
+            }
+        }
+    </style>
+</head>
+<body class="default-dark">
+    <div class="container">
+        <div class="header">
+            <div class="header-right">
+                <div class="tooltip">
+                    <button id="new-story-button"><i class="fas fa-file"></i></button>
+                    <span class="tooltiptext bottom">New Story</span>
+                </div>
+                <div class="tooltip">
+                    <button id="import-story-button"><i class="fas fa-upload"></i></button>
+                    <span class="tooltiptext bottom">Import</span>
+                </div>
+                <div class="tooltip">
+                    <button id="export-story-button"><i class="fas fa-download"></i></button>
+                    <span class="tooltiptext bottom">Export</span>
+                </div>
+                <div class="tooltip">
+                    <button id="connect-button"><i class="fas fa-link"></i></button>
+                    <span class="tooltiptext bottom">Connect</span>
+                </div>
+                <div class="tooltip">
+                    <button id="settings-button"><i class="fas fa-cog"></i></button>
+                    <span class="tooltiptext bottom">Settings</span>
+                </div>
+            </div>
+            <div class="header-left">
+                <select id="model-select" class="model-select"></select>
+            </div>
+        </div>
+        <div class="text-area" contenteditable="true" id="text-area"></div>
+        <div class="action-buttons">
+            <button id="generate-button">Generate</button>
+            <button id="retry-button">Retry</button>
+            <button id="undo-button">Undo</button>
+            <button id="cancel-button">Cancel</button>
+            <button id="save-manual-button">Save</button>
+        </div>
+        <div id="connect-dialog" class="dialog">
+            <div class="dialog-header">
+                <div class="dialog-title">Connect to LLM</div>
+                <button class="dialog-close" aria-label="Close">×</button>
+            </div>
+            <div class="dialog-content-scrollable">
+                <div class="dialog-content">
+                    <input type="text" id="api-url" class="dialog-input" placeholder="URL">
+                    <input type="text" id="api-key" class="dialog-input" placeholder="API Key (optional)">
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button id="connect-confirm" class="dialog-button">Connect</button>
+            </div>
+        </div>
+        <div id="settings-dialog" class="dialog">
+            <div class="dialog-header">
+                <div class="dialog-title">Settings</div>
+                <button class="dialog-close" aria-label="Close">×</button>
+            </div>
+            <div class="dialog-content-scrollable">
+                <div class="dialog-content">
+                    <div class="preset-dropdown">
+                        <select id="preset-select">
+                            <!-- Presets will be populated here -->
+                        </select>
+                    </div>
+                    <div class="preset-actions">
+                        <button id="save-preset-button">Save Preset</button>
+                        <button id="delete-preset-button">Delete Preset</button>
+                        <button id="reset-presets-button">Reset Presets</button>
+                    </div>
+                    <div class="parameter-row">
+                        <label for="max_tokens" class="parameter-label">Max Tokens</label>
+                        <input type="number" id="max_tokens" class="parameter-input">
+                    </div>
+                    <div class="parameter-row">
+                        <label for="temperature" class="parameter-label">Temperature</label>
+                        <input type="number" id="temperature" class="parameter-input">
+                    </div>
+                    <div class="parameter-row">
+                        <label for="top_p" class="parameter-label">Top P</label>
+                        <input type="number" id="top_p" class="parameter-input">
+                    </div>
+                    <div class="parameter-row">
+                        <label for="top_k" class="parameter-label">Top K</label>
+                        <input type="number" id="top_k" class="parameter-input">
+                    </div>
+                    <div class="parameter-row">
+                        <label for="min_p" class="parameter-label">Min P</label>
+                        <input type="number" id="min_p" class="parameter-input">
+                    </div>
+                    <div class="parameter-row">
+                        <label for="repetition_penalty" class="parameter-label">Repetition Penalty</label>
+                        <input type="number" id="repetition_penalty" class="parameter-input">
+                    </div>
+                    <div class="parameter-row">
+                        <label for="presence_penalty" class="parameter-label">Presence Penalty</label>
+                        <input type="number" id="presence_penalty" class="parameter-input">
+                    </div>
+                    <div class="preset-import-export">
+                        <button id="export-presets-button">Export Presets</button>
+                        <button id="import-presets-button">Import Presets</button>
+                    </div>
+                    <div class="preset-create">
+                        <input type="text" id="new-preset-name" class="dialog-input" placeholder="New Preset Name">
+                        <button id="create-preset-button" disabled>Create Preset</button>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button id="settings-save" class="dialog-button">Save</button>
+            </div>
+        </div>
+        <div id="snackbar-container" class="snackbar-container"></div>
+    </div>
+    <script>
+        let apiUrl = '';
+        let apiKey = '';
+        let currentReader;
+        let lastPrompt = '';
+        let lastGeneratedText = '';
+        let availableModels = [];
+        let selectedModel = '';
+        const loadedParams = localStorage.getItem('generationParameters');
+        let generationParameters = loadedParams ? JSON.parse(loadedParams) : {
+            max_tokens: 222,
+            temperature: 0.8,
+            top_p: 0.98,
+            top_k: -1,
+            min_p: 0.08,
+            repetition_penalty: 1.0,
+            presence_penalty: 0.5
+        };
+        const defaultPresets = {
+            "Default": {
+                "max_tokens": 222,
+                "temperature": 0.8,
+                "top_p": 0.98,
+                "top_k": -1,
+                "min_p": 0.08,
+                "repetition_penalty": 1.0,
+                "presence_penalty": 0.5
+            },
+            "NovelAI-Best Guess": {
+                "max_tokens": 222.0,
+                "temperature": 0.8,
+                "top_p": 0.9,
+                "top_k": 100.0,
+                "min_p": 0.02,
+                "repetition_penalty": 1.0,
+                "presence_penalty": 0.66
+            },
+            "NovelAI-Storywriter": {
+                "max_tokens": 222,
+                "temperature": 0.72,
+                "top_p": 0.73,
+                "top_k": -1,
+                "min_p": 0.02,
+                "repetition_penalty": 1.1,
+                "presence_penalty": 0.0
+            },
+            "Universal Light": {
+                "max_tokens": 222,
+                "temperature": 1.25,
+                "top_p": 1.0,
+                "top_k": -1,
+                "min_p": 0.1,
+                "repetition_penalty": 1.0,
+                "presence_penalty": 0.0
+            },
+            "Reddit settings": {
+                "max_tokens": 222,
+                "temperature": 1.37,
+                "top_p": 0.5,
+                "top_k": 100,
+                "min_p": 0.02,
+                "repetition_penalty": 1.06,
+                "presence_penalty": 0.0
+            },
+            "MagnumHotLane": {
+                "max_tokens": 222,
+                "temperature": 1.02,
+                "top_p": 1.0,
+                "top_k": -1,
+                "min_p": 0.08,
+                "repetition_penalty": 1.0,
+                "presence_penalty": 0.0
+            },
+            "Default Libre": {
+                "max_tokens": 222.0,
+                "temperature": 0.73,
+                "top_p": 0.92,
+                "top_k": 100.0,
+                "min_p": 0.02,
+                "repetition_penalty": 1.01,
+                "presence_penalty": 0.35
+            },
+            "Texy_norep": {
+                "max_tokens": 222.0,
+                "temperature": 1.08,
+                "top_p": 1.0,
+                "top_k": -1.0,
+                "min_p": 0.02,
+                "repetition_penalty": 1.0,
+                "presence_penalty": 0.0
+            },
+            "Nexus Stable Event": {
+                "max_tokens": 222.0,
+                "temperature": 0.8,
+                "top_p": 0.77,
+                "top_k": -1.0,
+                "min_p": 0.02,
+                "repetition_penalty": 1.0,
+                "presence_penalty": 1.0
+            }
+        };
+        const $ = document.querySelector.bind(document);
+        const $$ = document.querySelectorAll.bind(document);
+        const textArea = $('#text-area');
+        const generateButton = $('#generate-button');
+        const retryButton = $('#retry-button');
+        const undoButton = $('#undo-button');
+        const cancelButton = $('#cancel-button');
+        const saveManualButton = $('#save-manual-button');
+        const connectDialog = $('#connect-dialog');
+        const settingsDialog = $('#settings-dialog');
+        const connectConfirmButton = $('#connect-confirm');
+        const settingsSaveButton = $('#settings-save');
+        const apiURLInput = $('#api-url');
+        const apiKEYInput = $('#api-key');
+        const modelSelect = $('#model-select');
+        const presetSelect = $('#preset-select');
+        const snackbarContainer = $('#snackbar-container');
+        const newStoryButton = $('#new-story-button');
+        const exportStoryButton = $('#export-story-button');
+        const newPresetNameInput = $('#new-preset-name');
+        const createPresetButton = $('#create-preset-button');
+        const resetPresetsButton = $('#reset-presets-button');
+
+        // Function to normalize decimal values (replace commas with dots)
+        const normalizeDecimal = (value) => {
+            return value.toString().replace(/,/g, '.');
+        };
+
+        const setTheme = (theme) => {
+            document.body.classList.toggle('dark-theme', theme === 'dark');
+        };
+
+        const disableActions = () => {
+            generateButton.disabled = true;
+            retryButton.disabled = true;
+            undoButton.disabled = true;
+        };
+
+        const enableActions = () => {
+            generateButton.disabled = false;
+            retryButton.disabled = false;
+            undoButton.disabled = false;
+        };
+
+        const closeDialog = (dialog) => {
+            dialog.classList.remove('open');
+            setTimeout(() => {
+                dialog.style.display = 'none';
+                document.body.style.overflow = '';
+                $('.container').classList.remove('dialog-open');
+                if (dialog.id === 'settings-dialog') {
+                    // Update generationParameters directly
+                    for (const key in generationParameters) {
+                        const inputElement = $(`#${key}`);
+                        if (inputElement) {
+                            const normalizedValue = normalizeDecimal(inputElement.value);
+                            generationParameters[key] = parseFloat(normalizedValue);
+                        }
+                    }
+                    // Save updated generationParameters to local storage
+                    localStorage.setItem('generationParameters', JSON.stringify(generationParameters));
+                }
+            }, 300);
+        };
+
+        const updateInputFieldsFromParams = () => {
+            console.log("Updating input fields from generationParameters");
+            for (const key in generationParameters) {
+                const inputElement = $(`#${key}`);
+                if (inputElement) {
+                    inputElement.value = generationParameters[key];
+                }
+            }
+        };
+
+        const showDialog = (dialog) => {
+            dialog.style.display = 'block';
+            setTimeout(() => {
+                dialog.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                $('.container').classList.add('dialog-open');
+                if (dialog.id === 'settings-dialog') {
+                    populatePresetSelect();
+                    updateInputFieldsFromParams(); // Update input fields based on current parameters
+                }
+            }, 10);
+        };
+
+        const createSnackbar = (message, type = 'info') => {
+            const snackbar = document.createElement('div');
+            snackbar.classList.add('snackbar');
+            const snackbarContent = document.createElement('div');
+            snackbarContent.classList.add('snackbar-content');
+            const snackbarIcon = document.createElement('i');
+            snackbarIcon.classList.add('fas', 'snackbar-icon');
+            const snackbarMessage = document.createElement('span');
+            snackbarMessage.classList.add('snackbar-message');
+            snackbarMessage.textContent = message;
+            const snackbarCloseButton = document.createElement('button');
+            snackbarCloseButton.classList.add('snackbar-close');
+            snackbarCloseButton.setAttribute('aria-label', 'Close');
+            snackbarCloseButton.innerHTML = '<i class="fas fa-times"></i>';
+            snackbarCloseButton.addEventListener('click', () => {
+                hideSnackbar(snackbar);
+            });
+            switch (type) {
+                case 'error':
+                    snackbarIcon.classList.add('fa-exclamation-circle', 'snackbar-icon-error');
+                    break;
+                case 'success':
+                    snackbarIcon.classList.add('fa-check-circle', 'snackbar-icon-success');
+                    break;
+                case 'warning':
+                    snackbarIcon.classList.add('fa-exclamation-triangle', 'snackbar-icon-warning');
+                    break;
+                default:
+                    snackbarIcon.classList.add('fa-info-circle', 'snackbar-icon-info');
+                    break;
+            }
+            snackbarContent.appendChild(snackbarIcon);
+            snackbarContent.appendChild(snackbarMessage);
+            snackbar.appendChild(snackbarContent);
+            snackbar.appendChild(snackbarCloseButton);
+            snackbarContainer.appendChild(snackbar);
+            setTimeout(() => {
+                snackbar.classList.add('show');
+            }, 10);
+            snackbar.dataset.timeout = setTimeout(() => {
+                hideSnackbar(snackbar);
+            }, 5000);
+            return snackbar;
+        };
+
+        const showSnackbar = (message, type = 'info') => {
+            const snackbar = createSnackbar(message, type);
+            snackbarContainer.appendChild(snackbar);
+            setTimeout(() => {
+                snackbar.classList.add('show');
+                updateSnackbarPositions();
+            }, 10);
+            snackbar.dataset.timeout = setTimeout(() => {
+                hideSnackbar(snackbar);
+            }, 5000);
+        };
+
+        const hideSnackbar = (snackbar) => {
+            clearTimeout(snackbar.dataset.timeout);
+            snackbar.classList.remove('show');
+            snackbar.classList.add('hide');
+            setTimeout(() => {
+                snackbar.remove();
+                updateSnackbarPositions();
+            }, 300);
+        };
+
+        const updateSnackbarPositions = () => {
+            const snackbars = snackbarContainer.querySelectorAll('.snackbar');
+            let topOffset = 20;
+            snackbars.forEach((snackbar) => {
+                snackbar.style.top = `${topOffset}px`;
+                topOffset += snackbar.offsetHeight + 10;
+            });
+        };
+
+        const fetchModels = async () => {
+            if (!apiUrl) {
+                showSnackbar('No URL provided.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch(`${apiUrl}/models`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Incorrect API key provided.');
+                    } else {
+                        const errorText = await response.text();
+                        throw new Error(`Failed to connect to the LLM provider: ${response.status} - ${errorText}`);
+                    }
+                }
+                const data = await response.json();
+                availableModels = data.data.map(model => model.id);
+                populateModelSelect();
+                if (availableModels.length > 0) {
+                    setSelectedModel(availableModels[0]);
+                    modelSelect.addEventListener('change', () => {
+                        selectedModel = modelSelect.value;
+                    });
+                }
+                showSnackbar('Connected to LLM provider!', 'success');
+            } catch (error) {
+                showSnackbar(`Error: ${error.message}`, 'error');
+            }
+        };
+
+        const populateModelSelect = () => {
+            modelSelect.innerHTML = '';
+            availableModels.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelSelect.appendChild(option);
+            });
+        };
+
+        const setSelectedModel = (model) => {
+            selectedModel = model;
+            modelSelect.value = model;
+        };
+
+        const cancelStream = async () => {
+            if (currentReader) {
+                await currentReader.cancel();
+                currentReader = null;
+            }
+            saveTextAreaContent();
+        };
+
+        const sendMessage = async () => {
+            if (!apiUrl) {
+                showSnackbar('Please connect to a provider first.', 'error');
+                return;
+            }
+            const message = textArea.innerText;
+            if (message.trim() === '') return;
+            disableActions();
+            lastPrompt = message;
+            textArea.innerText = message;
+            const params = buildGenerationParameters();
+            console.log('Sending message with params:', params);
+            console.log('prompt:', message);
+            try {
+                const response = await fetch(`${apiUrl}/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: selectedModel,
+                        prompt: message,
+                        stream: true,
+                        ...params
+                    })
+                });
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showSnackbar('Incorrect API key provided.', 'error');
+                    } else {
+                        const errorText = await response.text();
+                        showSnackbar(`Error: ${response.status} - ${errorText}`, 'error');
+                    }
+                    return;
+                }
+                currentReader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let fullResponse = '';
+                while (true) {
+                    const { done, value } = await currentReader.read();
+                    if (done) {
+                        break;
+                    }
+                    buffer += decoder.decode(value, { stream: true });
+                    let boundary = buffer.indexOf('\n\n');
+                    while (boundary !== -1) {
+                        const chunk = buffer.substring(0, boundary);
+                        buffer = buffer.substring(boundary + 2);
+                        if (chunk.startsWith('data: ')) {
+                            const data = chunk.substring(6);
+                            if (data !== '[DONE]') {
+                                const json = JSON.parse(data);
+                                if (json.choices[0].text) {
+                                    const content = json.choices[0].text;
+                                    fullResponse += content;
+                                    // Wrap the content in a span with class 'highlight'
+                                    const highlightSpan = document.createElement('span');
+                                    highlightSpan.className = 'highlight';
+                                    highlightSpan.textContent = content;
+                                    textArea.appendChild(highlightSpan);
+                                }
+                            }
+                        }
+                        boundary = buffer.indexOf('\n\n');
+                    }
+                    textArea.scrollTop = textArea.scrollHeight;
+                }
+            lastGeneratedText = fullResponse;
+            saveTextAreaContent();
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Error:', error);
+                    showSnackbar(`Error: ${error.message}`, 'error');
+                }
+            } finally {
+                enableActions();
+            }
+        };
+
+        const retryGeneration = () => {
+            // Remove existing highlights
+            const existingHighlights = textArea.querySelectorAll('span.highlight');
+            existingHighlights.forEach(span => {
+                span.classList.remove('highlight');
+            });
+            // Rest of your code
+            textArea.innerText = lastPrompt;
+            saveTextAreaContent();
+            sendMessage();
+        };
+
+        const undoGeneration = () => {
+            // Remove existing highlights
+            const existingHighlights = textArea.querySelectorAll('span.highlight');
+            existingHighlights.forEach(span => {
+                span.classList.remove('highlight');
+            });
+            // Rest of your code
+            textArea.innerText = lastPrompt;
+            saveTextAreaContent();
+        };
+
+        const buildGenerationParameters = () => {
+            const paramsToSend = {};
+            for (const [key, value] of Object.entries(generationParameters)) {
+                const inputElement = $(`#${key}`);
+                if (inputElement) {
+                    // Normalize the value before sending
+                    const normalizedValue = normalizeDecimal(inputElement.value);
+                    paramsToSend[key] = parseFloat(normalizedValue);
+                }
+            }
+            return paramsToSend;
+        };
+
+        const importStory = () => {
+            const fileInput = document.getElementById('file-input');
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        textArea.innerText = e.target.result;
+                        saveTextAreaContent();
+                        showSnackbar('Story imported successfully', 'success');
+                    };
+                    reader.readAsText(file);
+                }
+            });
+            fileInput.click();
+        };
+
+        const exportStory = () => {
+            const filename = `story_export_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+            const data = textArea.innerText;
+            const blob = new Blob([data], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        const newStory = () => {
+            textArea.innerText = '';
+            saveTextAreaContent();
+            showSnackbar('Cleared all text.');
+        };
+
+        const loadPresets = () => {
+            const storedPresets = localStorage.getItem('presets');
+            return storedPresets ? JSON.parse(storedPresets) : defaultPresets;
+        };
+
+        const savePresets = (presets) => {
+            localStorage.setItem('presets', JSON.stringify(presets));
+        };
+
+        const getPresetNames = () => {
+            const presets = loadPresets();
+            return Object.keys(presets);
+        };
+
+        const getPreset = (presetName) => {
+            const presets = loadPresets();
+            return presets[presetName] || {};
+        };
+
+        const savePreset = (presetName, presetData) => {
+            const presets = loadPresets();
+            presets[presetName] = presetData;
+            savePresets(presets);
+        };
+
+        const deletePreset = (presetName) => {
+            const presets = loadPresets();
+            delete presets[presetName];
+            savePresets(presets);
+        };
+
+        const resetPresets = () => {
+            const presets = loadPresets();
+            for (const [name, preset] of Object.entries(defaultPresets)) {
+                presets[name] = preset;
+            }
+            savePresets(presets);
+            showSnackbar('Presets reset to default values.', 'success');
+        };
+
+        const populatePresetSelect = () => {
+            const presetSelect = $('#preset-select');
+            presetSelect.innerHTML = '';
+            const presets = loadPresets();
+            for (const presetName of Object.keys(presets)) {
+                const option = document.createElement('option');
+                option.value = presetName;
+                option.textContent = presetName;
+                presetSelect.appendChild(option);
+            }
+        };
+
+        const applyPreset = (preset) => {
+            for (const [key, value] of Object.entries(preset)) {
+                const inputElement = $(`#${key}`);
+                if (inputElement) {
+                    inputElement.value = value;
+                }
+            }
+            generationParameters = preset;
+        };
+
+        const exportPresets = () => {
+            const presets = loadPresets();
+            const filename = `presets_export_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+            const data = JSON.stringify(presets, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        const importPresets = (file) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedPresets = JSON.parse(event.target.result);
+                    const currentPresets = loadPresets();
+                    for (const [name, preset] of Object.entries(importedPresets)) {
+                        currentPresets[name] = preset;
+                    }
+                    savePresets(currentPresets);
+                    showSnackbar('Presets imported successfully.', 'success');
+                    populatePresetSelect();
+                } catch (error) {
+                    showSnackbar('Failed to import presets.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        const saveTextAreaContent = () => {
+            localStorage.setItem('textAreaContent', textArea.innerText);
+        };
+
+        const createNewPreset = () => {
+            const presetName = newPresetNameInput.value.trim();
+            if (!presetName) {
+                showSnackbar('Preset name cannot be empty.', 'error');
+                return;
+            }
+            const params = {};
+            for (const key in generationParameters) {
+                const inputElement = $(`#${key}`);
+                if (inputElement) {
+                    // Normalize the value before saving
+                    const normalizedValue = normalizeDecimal(inputElement.value);
+                    params[key] = parseFloat(normalizedValue);
+                }
+            }
+            savePreset(presetName, params);
+            showSnackbar(`Preset "${presetName}" created.`, 'success');
+            populatePresetSelect();
+            newPresetNameInput.value = '';
+        };
+
+        const validateCreatePresetButton = () => {
+            const presetName = newPresetNameInput.value.trim();
+            let isValid = presetName !== '';
+            for (const key in generationParameters) {
+                const inputElement = $(`#${key}`);
+                if (inputElement) {
+                    const value = inputElement.value.trim();
+                    if (value === '' || isNaN(value)) {
+                        isValid = false;
+                        break;
+                    }
+                }
+            }
+            createPresetButton.disabled = !isValid;
+        };
+
+        document.addEventListener('click', (event) => {
+            const target = event.target;
+            if (target.classList.contains('dialog-close')) {
+                closeDialog(target.closest('.dialog'));
+            } else if (target.closest('#connect-button')) {
+                showDialog(connectDialog);
+            } else if (target.closest('#settings-button')) {
+                showDialog(settingsDialog);
+            } else if (target.id === 'connect-confirm') {
+                apiUrl = apiURLInput.value;
+                apiKey = apiKEYInput.value;
+                localStorage.setItem('apiUrl', apiUrl);
+                localStorage.setItem('apiKey', apiKey);
+                fetchModels();
+                closeDialog(connectDialog);
+            } else if (target.id === 'settings-save') {
+                for (const key in generationParameters) {
+                    const inputElement = $(`#${key}`);
+                    if (inputElement) {
+                        // Normalize the value before saving
+                        const normalizedValue = normalizeDecimal(inputElement.value);
+                        generationParameters[key] = parseFloat(normalizedValue);
+                    }
+                }
+                localStorage.setItem('generationParameters', JSON.stringify(generationParameters));
+                showSnackbar('Settings saved', 'success');
+                closeDialog(settingsDialog);
+            } else if (target.closest('#import-story-button')) {
+                importStory();
+            } else if (target.closest('#export-story-button')) {
+                exportStory();
+            } else if (target.closest('#new-story-button')) {
+                newStory();
+            } else if (target.closest('#cancel-button')) {
+                cancelStream();
+                enableActions();
+            } else if (target.closest('#preset-select')) {
+                const presetName = presetSelect.value;
+                applyPreset(getPreset(presetName));
+            } else if (target.closest('#save-preset-button')) {
+                const presetName = presetSelect.value;
+                if (presetName) {
+                    const params = {};
+                    for (const key in generationParameters) {
+                        const inputElement = $(`#${key}`);
+                        if (inputElement) {
+                            // Normalize the value before saving
+                            const normalizedValue = normalizeDecimal(inputElement.value);
+                            params[key] = parseFloat(normalizedValue);
+                        }
+                    }
+                    savePreset(presetName, params);
+                    showSnackbar(`Preset "${presetName}" saved.`, 'success');
+                }
+            } else if (target.closest('#delete-preset-button')) {
+                const presetName = presetSelect.value;
+                if (presetName) {
+                    deletePreset(presetName);
+                    showSnackbar(`Preset "${presetName}" deleted.`, 'success');
+                    populatePresetSelect();
+                }
+            } else if (target.closest('#reset-presets-button')) {
+                resetPresets();
+            } else if (target.closest('#export-presets-button')) {
+                exportPresets();
+            } else if (target.closest('#import-presets-button')) {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'application/json';
+                input.onchange = (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        importPresets(file);
+                    }
+                };
+                input.click();
+            } else if (target.closest('#save-manual-button')) {
+                saveTextAreaContent();
+                showSnackbar('Content saved.', 'success');
+            } else if (target.closest('#create-preset-button')) {
+                createNewPreset();
+            }
+        });
+
+        generateButton.addEventListener('click', sendMessage);
+        retryButton.addEventListener('click', retryGeneration);
+        undoButton.addEventListener('click', undoGeneration);
+        cancelButton.addEventListener('click', cancelStream);
+        saveManualButton.addEventListener('click', () => {
+            saveTextAreaContent();
+            showSnackbar('Content saved.', 'success');
+        });
+
+        presetSelect.addEventListener('change', (event) => {
+            const presetName = event.target.value;
+            applyPreset(getPreset(presetName));
+        });
+
+        textArea.addEventListener('input', () => {
+            localStorage.setItem('textAreaContent', textArea.innerText);
+        });
+
+        const parameterInputs = $$('input.parameter-input');
+        parameterInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                // Normalize the value by replacing commas with dots
+                const normalizedValue = normalizeDecimal(input.value);
+                generationParameters[input.id] = parseFloat(normalizedValue);
+                localStorage.setItem('generationParameters', JSON.stringify(generationParameters));
+                validateCreatePresetButton();
+            });
+        });
+
+        newPresetNameInput.addEventListener('input', () => {
+            validateCreatePresetButton();
+        });
+
+        window.addEventListener('load', () => {
+            apiUrl = localStorage.getItem('apiUrl') || '';
+            apiKey = localStorage.getItem('apiKey') || '';
+            apiURLInput.value = apiUrl;
+            apiKEYInput.value = apiKey;
+            if (apiUrl) {
+                fetchModels();
+            }
+            const savedContent = localStorage.getItem('textAreaContent');
+            if (savedContent) {
+                textArea.innerText = savedContent;
+            }
+            const savedParams = localStorage.getItem('generationParameters');
+            if (savedParams) {
+                const params = JSON.parse(savedParams);
+                for (const [key, value] of Object.entries(params)) {
+                    const inputElement = $(`#${key}`);
+                    if (inputElement) {
+                        inputElement.value = value;
+                    }
+                }
+                generationParameters = params;
+            }
+            populatePresetSelect();
+            validateCreatePresetButton();
+        });
+
+        populatePresetSelect();
+    </script>
+    <input type="file" id="file-input" style="display:none;" accept=".txt">
+</body>
+</html>
