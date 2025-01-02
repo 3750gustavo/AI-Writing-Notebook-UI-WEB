@@ -921,11 +921,11 @@
                 showSnackbar('Please connect to a provider first.', 'error');
                 return;
             }
-            const message = textArea.innerText;
+            const message = textArea.textContent;
             if (message.trim() === '') return;
             disableActions();
             lastPrompt = message;
-            textArea.innerText = message;
+            textArea.textContent = message;
             const params = buildGenerationParameters();
             console.log('Sending message with params:', params);
             console.log('prompt:', message);
@@ -1004,7 +1004,7 @@
                 span.classList.remove('highlight');
             });
             // Rest of your code
-            textArea.innerText = lastPrompt;
+            textArea.textContent = lastPrompt;
             saveTextAreaContent();
             sendMessage();
         };
@@ -1016,7 +1016,7 @@
                 span.classList.remove('highlight');
             });
             // Rest of your code
-            textArea.innerText = lastPrompt;
+            textArea.textContent = lastPrompt;
             saveTextAreaContent();
         };
 
@@ -1040,7 +1040,7 @@
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        textArea.innerText = e.target.result;
+                        textArea.textContent = e.target.result;
                         saveTextAreaContent();
                         showSnackbar('Story imported successfully', 'success');
                     };
@@ -1052,7 +1052,7 @@
 
         const exportStory = () => {
             const filename = `story_export_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
-            const data = textArea.innerText;
+            const data = textArea.textContent;
             const blob = new Blob([data], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1065,7 +1065,7 @@
         };
 
         const newStory = () => {
-            textArea.innerText = '';
+            textArea.textContent = '';
             saveTextAreaContent();
             showSnackbar('Cleared all text.');
         };
@@ -1167,7 +1167,7 @@
         };
 
         const saveTextAreaContent = () => {
-            localStorage.setItem('textAreaContent', textArea.innerText);
+            localStorage.setItem('textAreaContent', textArea.textContent);
         };
 
         const createNewPreset = () => {
@@ -1306,7 +1306,7 @@
         });
 
         textArea.addEventListener('input', () => {
-            localStorage.setItem('textAreaContent', textArea.innerText);
+            localStorage.setItem('textAreaContent', textArea.textContent);
         });
 
         const parameterInputs = $$('input.parameter-input');
@@ -1334,7 +1334,7 @@
             }
             const savedContent = localStorage.getItem('textAreaContent');
             if (savedContent) {
-                textArea.innerText = savedContent;
+                textArea.textContent = savedContent;
             }
             const savedParams = localStorage.getItem('generationParameters');
             if (savedParams) {
