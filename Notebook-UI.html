@@ -944,6 +944,8 @@
                     })
                 });
                 if (!response.ok) {
+                    // Restore original content immediately on error
+                    textArea.textContent = lastPrompt;
                     if (response.status === 401) {
                         showSnackbar('Incorrect API key provided.', 'error');
                     } else {
@@ -991,9 +993,11 @@
                 if (error.name !== 'AbortError') {
                     console.error('Error:', error);
                     showSnackbar(`Error: ${error.message}`, 'error');
+                    textArea.textContent = lastPrompt;
                 }
             } finally {
                 enableActions();
+                saveTextAreaContent();
             }
         };
 
