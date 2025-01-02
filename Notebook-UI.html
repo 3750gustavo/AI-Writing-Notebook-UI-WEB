@@ -925,7 +925,7 @@
             if (message.trim() === '') return;
             disableActions();
             lastPrompt = message;
-            textArea.textContent = message;
+            //textArea.textContent = message;
             const params = buildGenerationParameters();
             console.log('Sending message with params:', params);
             console.log('prompt:', message);
