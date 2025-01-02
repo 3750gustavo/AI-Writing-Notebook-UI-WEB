@@ -958,6 +958,11 @@
                 const decoder = new TextDecoder();
                 let buffer = '';
                 let fullResponse = '';
+                // before start generating, remove any existing highlights
+                const existingHighlights = textArea.querySelectorAll('span.highlight');
+                existingHighlights.forEach(span => {
+                    span.classList.remove('highlight');
+                });
                 while (true) {
                     const { done, value } = await currentReader.read();
                     if (done) {
