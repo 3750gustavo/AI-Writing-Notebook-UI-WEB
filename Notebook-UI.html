@@ -962,16 +962,39 @@
             saveTextAreaContent();
         };
 
+        const getTextAreaContent = () => {
+            // Create a clone of the text area
+            const clone = textArea.cloneNode(true);
+
+            // Replace any divs or other elements with linebreaks and their text content
+            const divs = clone.querySelectorAll('div');
+            divs.forEach(div => {
+                const textNode = document.createTextNode("\n" + div.textContent);
+                div.parentNode.replaceChild(textNode, div);
+            });
+
+            // Replace any <br> elements with newlines
+            const brs = clone.querySelectorAll('br');
+            brs.forEach(br => {
+                const textNode = document.createTextNode("\n");
+                br.parentNode.replaceChild(textNode, br);
+            });
+
+            return clone.textContent;
+        };
+
         const sendMessage = async () => {
             if (!apiUrl) {
                 showSnackbar('Please connect to a provider first.', 'error');
                 return;
             }
-            const message = textArea.textContent;
+
+            const message = getTextAreaContent(); // Use the new function instead of textArea.textContent
             if (message.trim() === '') return;
+
             disableActions();
             lastPrompt = message;
-            //textArea.textContent = message;
+
             const params = buildGenerationParameters();
             console.log('Sending message with params:', params);
             console.log('prompt:', message);
@@ -1222,7 +1245,7 @@
         };
 
         const saveTextAreaContent = () => {
-            localStorage.setItem('textAreaContent', textArea.textContent);
+            localStorage.setItem('textAreaContent', getTextAreaContent());
         };
 
         const createNewPreset = () => {
@@ -1260,6 +1283,24 @@
                 }
             }
             createPresetButton.disabled = !isValid;
+        };
+
+        const normalizeTextAreaStructure = () => {
+            // Get current text and selection
+            const content = getTextAreaContent();
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0).cloneRange();
+
+            // Replace all content with normalized text
+            textArea.textContent = content;
+
+            // Try to restore selection
+            try {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } catch (e) {
+                // If selection can't be restored, that's okay
+            }
         };
 
         document.addEventListener('click', (event) => {
@@ -1364,35 +1405,22 @@
         });
 
         textArea.addEventListener('input', () => {
-            localStorage.setItem('textAreaContent', textArea.textContent);
+            // Debounce the normalization to avoid disrupting typing
+            clearTimeout(textArea.normalizeTimeout);
+            textArea.normalizeTimeout = setTimeout(normalizeTextAreaStructure, 1000);
+
+            // Still save immediately
+            saveTextAreaContent();
         });
 
         textArea.addEventListener('paste', (e) => {
-            // Prevent the default paste behavior
             e.preventDefault();
 
             // Get plain text from clipboard
             let text = (e.clipboardData || window.clipboardData).getData('text');
 
-            // Create a text node to preserve exact formatting
-            const textNode = document.createTextNode(text);
-
-            // Get selection to insert at cursor position
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                range.deleteContents();
-                range.insertNode(textNode);
-
-                // Move cursor after the inserted text
-                range.setStartAfter(textNode);
-                range.setEndAfter(textNode);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            } else {
-                // If no selection, append to the end
-                textArea.appendChild(textNode);
-            }
+            // Insert text at cursor position as plain text
+            document.execCommand('insertText', false, text);
 
             // Save content
             saveTextAreaContent();
