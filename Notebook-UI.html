@@ -527,7 +527,7 @@
                 <select id="model-select" class="model-select"></select>
             </div>
         </div>
-        <div class="text-area" contenteditable="true" id="text-area"></div>
+        <pre class="text-area" contenteditable="true" id="text-area"></pre>
         <div class="action-buttons">
             <button id="generate-button">Generate</button>
             <button id="retry-button">Retry</button>
@@ -993,7 +993,7 @@
                 });
                 if (!response.ok) {
                     // Restore original content immediately on error
-                    textArea.innerHTML = lastPrompt;
+                    textArea.textContent = lastPrompt;
                     if (response.status === 401) {
                         showSnackbar('Incorrect API key provided.', 'error');
                     } else {
@@ -1046,7 +1046,7 @@
                 if (error.name !== 'AbortError') {
                     console.error('Error:', error);
                     showSnackbar(`Error: ${error.message}`, 'error');
-                    textArea.innerHTML = lastPrompt;
+                    textArea.textContent = lastPrompt;
                 }
             } finally {
                 enableActions();
@@ -1060,7 +1060,7 @@
             existingHighlights.forEach(span => {
                 span.classList.remove('highlight');
             });
-            textArea.innerHTML = lastPrompt;
+            textArea.textContent = lastPrompt;
             saveTextAreaContent();
             sendMessage();
         };
@@ -1071,7 +1071,7 @@
             existingHighlights.forEach(span => {
                 span.classList.remove('highlight');
             });
-            textArea.innerHTML = lastPrompt;
+            textArea.textContent = lastPrompt;
             saveTextAreaContent();
         };
 
@@ -1365,6 +1365,37 @@
 
         textArea.addEventListener('input', () => {
             localStorage.setItem('textAreaContent', textArea.textContent);
+        });
+
+        textArea.addEventListener('paste', (e) => {
+            // Prevent the default paste behavior
+            e.preventDefault();
+
+            // Get plain text from clipboard
+            let text = (e.clipboardData || window.clipboardData).getData('text');
+
+            // Create a text node to preserve exact formatting
+            const textNode = document.createTextNode(text);
+
+            // Get selection to insert at cursor position
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(textNode);
+
+                // Move cursor after the inserted text
+                range.setStartAfter(textNode);
+                range.setEndAfter(textNode);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                // If no selection, append to the end
+                textArea.appendChild(textNode);
+            }
+
+            // Save content
+            saveTextAreaContent();
         });
 
         const parameterInputs = $$('input.parameter-input');
