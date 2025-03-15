@@ -993,7 +993,7 @@
                 });
                 if (!response.ok) {
                     // Restore original content immediately on error
-                    textArea.textContent = lastPrompt;
+                    textArea.innerHTML = lastPrompt;
                     if (response.status === 401) {
                         showSnackbar('Incorrect API key provided.', 'error');
                     } else {
@@ -1046,7 +1046,7 @@
                 if (error.name !== 'AbortError') {
                     console.error('Error:', error);
                     showSnackbar(`Error: ${error.message}`, 'error');
-                    textArea.textContent = lastPrompt;
+                    textArea.innerHTML = lastPrompt;
                 }
             } finally {
                 enableActions();
@@ -1060,8 +1060,7 @@
             existingHighlights.forEach(span => {
                 span.classList.remove('highlight');
             });
-            // Rest of your code
-            textArea.textContent = lastPrompt;
+            textArea.innerHTML = lastPrompt;
             saveTextAreaContent();
             sendMessage();
         };
@@ -1072,8 +1071,7 @@
             existingHighlights.forEach(span => {
                 span.classList.remove('highlight');
             });
-            // Rest of your code
-            textArea.textContent = lastPrompt;
+            textArea.innerHTML = lastPrompt;
             saveTextAreaContent();
         };
 
