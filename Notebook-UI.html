@@ -1286,20 +1286,59 @@
         };
 
         const normalizeTextAreaStructure = () => {
-            // Get current text and selection
-            const content = getTextAreaContent();
+            // Store current selection state
             const selection = window.getSelection();
-            const range = selection.getRangeAt(0).cloneRange();
+            let cursorPosition = 0;
+
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                // Calculate cursor position before normalization
+                const preSelectionRange = range.cloneRange();
+                preSelectionRange.selectNodeContents(textArea);
+                preSelectionRange.setEnd(range.startContainer, range.startOffset);
+                cursorPosition = preSelectionRange.toString().length;
+            }
+
+            // Get and normalize content
+            const content = getTextAreaContent();
 
             // Replace all content with normalized text
             textArea.textContent = content;
 
-            // Try to restore selection
+            // Attempt to restore cursor position
             try {
-                selection.removeAllRanges();
-                selection.addRange(range);
+                // Create a new range
+                const newRange = document.createRange();
+                let currentPos = 0;
+                let found = false;
+
+                // Function to find the position in text nodes
+                function findTextNode(node) {
+                    if (found) return;
+
+                    if (node.nodeType === 3) { // Text node
+                        if (currentPos + node.length >= cursorPosition) {
+                            newRange.setStart(node, cursorPosition - currentPos);
+                            found = true;
+                        } else {
+                            currentPos += node.length;
+                        }
+                    } else if (node.nodeType === 1) { // Element node
+                        for (let i = 0; i < node.childNodes.length && !found; i++) {
+                            findTextNode(node.childNodes[i]);
+                        }
+                    }
+                }
+
+                findTextNode(textArea);
+
+                if (found) {
+                    selection.removeAllRanges();
+                    selection.addRange(newRange);
+                }
             } catch (e) {
-                // If selection can't be restored, that's okay
+                // If selection restoration fails, that's okay
+                console.log("Could not restore selection:", e);
             }
         };
 
@@ -1421,6 +1460,9 @@
 
             // Insert text at cursor position as plain text
             document.execCommand('insertText', false, text);
+
+            // Normalize immediately after paste instead of waiting for debounce
+            normalizeTextAreaStructure();
 
             // Save content
             saveTextAreaContent();
