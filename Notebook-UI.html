@@ -253,7 +253,6 @@
             opacity: 0;
             transform: translate(-50%, -50%) scale(0.8);
             max-height: 90vh; /* Ensure dialog doesn't exceed viewport height */
-            overflow-y: auto;
         }
         .dialog.open {
             opacity: 1;
@@ -272,9 +271,13 @@
         .dialog-content-scrollable {
             overflow-y: auto;
             padding: 16px 24px;
+            display: flex;
+            flex-direction: column; /* Added to maintain the structure */
             max-height: calc(100vh - 200px); /* Adjust based on your layout */
         }
         .dialog-content {
+            display: flex;
+            width: 100%; /* avoids horizontal scrollbar */
             display: flex;
             flex-direction: column;
             gap: 16px;
