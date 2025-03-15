@@ -980,7 +980,7 @@
                 const response = await fetch(`${apiUrl}/v1/completions`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json; charset=utf-8',
                         'Authorization': `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
