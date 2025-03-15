@@ -864,8 +864,10 @@
                 showSnackbar('No URL provided.', 'error');
                 return;
             }
+
+            // TODO: make it try without v1 if it fails
             try {
-                const response = await fetch(`${apiUrl}/models`, {
+                const response = await fetch(`${apiUrl}/v1/models`, {
                     headers: {
                         'Authorization': `Bearer ${apiKey}`
                     }
@@ -929,8 +931,10 @@
             const params = buildGenerationParameters();
             console.log('Sending message with params:', params);
             console.log('prompt:', message);
+            // use v1/completions instead of just completions
+            // TODO: make it try without v1 if it fails
             try {
-                const response = await fetch(`${apiUrl}/completions`, {
+                const response = await fetch(`${apiUrl}/v1/completions`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
