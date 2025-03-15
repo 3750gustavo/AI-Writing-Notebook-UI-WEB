@@ -859,6 +859,33 @@
             });
         };
 
+        const groupModelsBySize = (models) => {
+            const sizePattern = /(\d+)x(\d+)[bB]|(\d+)[bB]/i;
+
+            const getSize = (modelName) => {
+                const match = sizePattern.exec(modelName);
+                if (match) {
+                    if (match[1] && match[2]) { // multiplied size
+                        return parseInt(match[1]) * parseInt(match[2]);
+                    } else { // direct size
+                        return parseInt(match[3]);
+                    }
+                } else {
+                    return Infinity; // place at the end
+                }
+            };
+
+            // Sort models based on size and then alphabetically
+            return models.sort((a, b) => {
+                const sizeA = getSize(a);
+                const sizeB = getSize(b);
+                if (sizeA === sizeB) {
+                    return a.localeCompare(b);
+                }
+                return sizeA - sizeB;
+            });
+        };
+
         const fetchModels = async () => {
             if (!apiUrl) {
                 showSnackbar('No URL provided.', 'error');
@@ -881,7 +908,7 @@
                     }
                 }
                 const data = await response.json();
-                availableModels = data.data.map(model => model.id);
+                availableModels = groupModelsBySize(data.data.map(model => model.id));
                 populateModelSelect();
                 if (availableModels.length > 0) {
                     setSelectedModel(availableModels[0]);
