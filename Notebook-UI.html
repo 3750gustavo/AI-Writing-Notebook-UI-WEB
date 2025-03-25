@@ -960,7 +960,8 @@
                 await currentReader.cancel();
                 currentReader = null;
             }
-            isGenerating = false;
+            isGenerating = false; // Reset state when cancelling
+            enableActions();
             saveTextAreaContent();
         };
 
@@ -986,6 +987,7 @@
         };
 
         const sendMessage = async () => {
+            disableActions();
             if (!apiUrl) {
                 showSnackbar('Please connect to a provider first.', 'error');
                 return;
@@ -994,7 +996,6 @@
             const message = getTextAreaContent(); // Use the new function instead of textArea.textContent
             if (message.trim() === '') return;
 
-            disableActions();
             lastPrompt = message;
             isGenerating = true;
 
@@ -1441,12 +1442,11 @@
         });
 
         textArea.addEventListener('input', () => {
-            // Debounce the normalization to avoid disrupting typing
-            clearTimeout(textArea.normalizeTimeout);
-            if (!isGenerating)
+            if (!isGenerating){
+                // Debounce the normalization
+                clearTimeout(textArea.normalizeTimeout);
                 textArea.normalizeTimeout = setTimeout(normalizeTextAreaStructure, 1000);
-
-            // Still save immediately
+            }
             saveTextAreaContent();
         });
 
