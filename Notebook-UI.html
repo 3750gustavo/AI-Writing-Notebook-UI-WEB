@@ -619,6 +619,7 @@
         let lastGeneratedText = '';
         let availableModels = [];
         let selectedModel = '';
+        let isGenerating = false; // flag to prevent multiple requests and to stop normalization text is being generated
         const loadedParams = localStorage.getItem('generationParameters');
         let generationParameters = loadedParams ? JSON.parse(loadedParams) : {
             max_tokens: 222,
@@ -959,6 +960,7 @@
                 await currentReader.cancel();
                 currentReader = null;
             }
+            isGenerating = false;
             saveTextAreaContent();
         };
 
@@ -994,6 +996,7 @@
 
             disableActions();
             lastPrompt = message;
+            isGenerating = true;
 
             const params = buildGenerationParameters();
             console.log('Sending message with params:', params);
@@ -1015,8 +1018,6 @@
                     })
                 });
                 if (!response.ok) {
-                    // Restore original content immediately on error
-                    textArea.textContent = lastPrompt;
                     if (response.status === 401) {
                         showSnackbar('Incorrect API key provided.', 'error');
                     } else {
@@ -1069,9 +1070,10 @@
                 if (error.name !== 'AbortError') {
                     console.error('Error:', error);
                     showSnackbar(`Error: ${error.message}`, 'error');
-                    textArea.textContent = lastPrompt;
+                    lastPrompt = textArea.textContent; // update last prompt with what it managed to generate before error
                 }
             } finally {
+                isGenerating = false;
                 enableActions();
                 saveTextAreaContent();
             }
@@ -1441,7 +1443,8 @@
         textArea.addEventListener('input', () => {
             // Debounce the normalization to avoid disrupting typing
             clearTimeout(textArea.normalizeTimeout);
-            textArea.normalizeTimeout = setTimeout(normalizeTextAreaStructure, 1000);
+            if (!isGenerating)
+                textArea.normalizeTimeout = setTimeout(normalizeTextAreaStructure, 1000);
 
             // Still save immediately
             saveTextAreaContent();
