@@ -1454,7 +1454,11 @@
             let text = (e.clipboardData || window.clipboardData).getData('text');
 
             // Insert text at cursor position as plain text
-            document.execCommand('insertText', false, text);
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const textNode = document.createTextNode(text);
+            range.insertNode(textNode);
+            selection.collapse(textNode, text.length); // Optional: Move cursor to end of inserted text
 
             // Normalize immediately after paste instead of waiting for debounce
             normalizeTextAreaStructure();
