@@ -1083,15 +1083,15 @@
             existingHighlights.forEach(span => {
                 span.classList.remove('highlight');
             });
+            // Restore the last prompt (undo step)
             textArea.textContent = lastPrompt;
             saveTextAreaContent();
 
+            // Generate again (retry step)
             if (action === 'retry') {
                 sendMessage();
-            } else {
-                saveSession();
             }
-            };
+        };
 
         const buildGenerationParameters = () => {
             const paramsToSend = {};
