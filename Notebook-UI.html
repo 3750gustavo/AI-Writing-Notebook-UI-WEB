@@ -1077,7 +1077,7 @@
             }
         };
 
-        const retryGeneration = () => {
+        const retryOrUndoGeneration = (action) => {
             // Remove existing highlights
             const existingHighlights = textArea.querySelectorAll('span.highlight');
             existingHighlights.forEach(span => {
@@ -1085,18 +1085,13 @@
             });
             textArea.textContent = lastPrompt;
             saveTextAreaContent();
-            sendMessage();
-        };
 
-        const undoGeneration = () => {
-            // Remove existing highlights
-            const existingHighlights = textArea.querySelectorAll('span.highlight');
-            existingHighlights.forEach(span => {
-                span.classList.remove('highlight');
-            });
-            textArea.textContent = lastPrompt;
-            saveTextAreaContent();
-        };
+            if (action === 'retry') {
+                sendMessage();
+            } else {
+                saveSession();
+            }
+            };
 
         const buildGenerationParameters = () => {
             const paramsToSend = {};
@@ -1430,8 +1425,8 @@
         });
 
         generateButton.addEventListener('click', sendMessage);
-        retryButton.addEventListener('click', retryGeneration);
-        undoButton.addEventListener('click', undoGeneration);
+        retryButton.addEventListener('click', () => retryOrUndoGeneration('retry'));
+        undoButton.addEventListener('click', () => retryOrUndoGeneration('undo'));
         cancelButton.addEventListener('click', cancelStream);
         saveManualButton.addEventListener('click', () => {
             saveTextAreaContent();
