@@ -1300,7 +1300,17 @@
                 if (inputElement) {
                     // Normalize the value before saving
                     const normalizedValue = normalizeDecimal(inputElement.value);
-                    params[key] = parseFloat(normalizedValue);
+                    if (key === 'max_tokens' || key === 'top_k') {
+                        let intVal = parseInt(normalizedValue);
+                        intVal = clampValue(intVal, parseInt(inputElement.min), parseInt(inputElement.max));
+                        params[key] = intVal;
+                    } else {
+                        let floatVal = parseFloat(normalizedValue);
+                        if (inputElement.min && inputElement.max) {
+                            floatVal = clampValue(floatVal, parseFloat(inputElement.min), parseFloat(inputElement.max));
+                        }
+                        params[key] = floatVal;
+                    }
                 }
             }
             savePreset(presetName, params);
@@ -1435,7 +1445,17 @@
                         if (inputElement) {
                             // Normalize the value before saving
                             const normalizedValue = normalizeDecimal(inputElement.value);
-                            params[key] = parseFloat(normalizedValue);
+                            if (key === 'max_tokens' || key === 'top_k') {
+                                let intVal = parseInt(normalizedValue);
+                                intVal = clampValue(intVal, parseInt(inputElement.min), parseInt(inputElement.max));
+                                params[key] = intVal;
+                            } else {
+                                let floatVal = parseFloat(normalizedValue);
+                                if (inputElement.min && inputElement.max) {
+                                    floatVal = clampValue(floatVal, parseFloat(inputElement.min), parseFloat(inputElement.max));
+                                }
+                                params[key] = floatVal;
+                            }
                         }
                     }
                     savePreset(presetName, params);
