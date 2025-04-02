@@ -619,6 +619,7 @@
         let lastGeneratedText = '';
         let availableModels = [];
         let selectedModel = '';
+        let currentPresetName = localStorage.getItem('selectedPreset') || 'Default';
         let isGenerating = false; // flag to prevent multiple requests and to stop normalization text is being generated
         const loadedParams = localStorage.getItem('generationParameters');
         let generationParameters = loadedParams ? JSON.parse(loadedParams) : {
@@ -767,12 +768,29 @@
                 document.body.style.overflow = '';
                 $('.container').classList.remove('dialog-open');
                 if (dialog.id === 'settings-dialog') {
-                    // Update generationParameters directly
                     for (const key in generationParameters) {
                         const inputElement = $(`#${key}`);
                         if (inputElement) {
+                            // Fix empty values
+                            if (inputElement.value.trim() === '') {
+                                // Use the default from the current preset or keep the previous value
+                                const defaults = getPreset(currentPresetName);
+                                inputElement.value = defaults[key] !== undefined ? defaults[key] : generationParameters[key];
+                            }
+
+                            // Now normalize and clamp all values
                             const normalizedValue = normalizeDecimal(inputElement.value);
-                            generationParameters[key] = parseFloat(normalizedValue);
+                            if (key === 'max_tokens' || key === 'top_k') {
+                                let intVal = parseInt(normalizedValue);
+                                intVal = clampValue(intVal, parseInt(inputElement.min), parseInt(inputElement.max));
+                                inputElement.value = intVal;
+                                generationParameters[key] = intVal;
+                            } else {
+                                let floatVal = parseFloat(normalizedValue);
+                                floatVal = clampValue(floatVal, parseFloat(inputElement.min), parseFloat(inputElement.max));
+                                inputElement.value = floatVal;
+                                generationParameters[key] = floatVal;
+                            }
                         }
                     }
                     // Save updated generationParameters to local storage
@@ -799,6 +817,14 @@
                 $('.container').classList.add('dialog-open');
                 if (dialog.id === 'settings-dialog') {
                     populatePresetSelect();
+                    // Sync the dropdown using the currentPresetName
+                    const presetOptions = presetSelect.querySelectorAll('option');
+                    presetOptions.forEach(option => {
+                        if (option.value === currentPresetName) {
+                            option.selected = true;
+                        }
+                    });
+
                     updateInputFieldsFromParams(); // Update input fields based on current parameters
                 }
             }, 10);
@@ -931,7 +957,10 @@
                 const data = await response.json();
                 availableModels = groupModelsBySize(data.data.map(model => model.id));
                 populateModelSelect();
-                if (availableModels.length > 0) {
+                const savedModel = localStorage.getItem('selectedModel');
+                if (savedModel && availableModels.includes(savedModel)) {
+                    setSelectedModel(savedModel);
+                } else if (availableModels.length > 0) {
                     setSelectedModel(availableModels[0]);
                     modelSelect.addEventListener('change', () => {
                         selectedModel = modelSelect.value;
@@ -1394,6 +1423,8 @@
                 enableActions();
             } else if (target.closest('#preset-select')) {
                 const presetName = presetSelect.value;
+                currentPresetName = presetName;
+                localStorage.setItem('selectedPreset', presetName);
                 applyPreset(getPreset(presetName));
             } else if (target.closest('#save-preset-button')) {
                 const presetName = presetSelect.value;
@@ -1451,6 +1482,8 @@
 
         presetSelect.addEventListener('change', (event) => {
             const presetName = event.target.value;
+            currentPresetName = presetName;
+            localStorage.setItem('selectedPreset', presetName);
             applyPreset(getPreset(presetName));
         });
 
@@ -1486,28 +1519,34 @@
         const parameterInputs = $$('input.parameter-input');
         parameterInputs.forEach(input => {
             input.addEventListener('input', () => {
-                // Normalize the value by replacing commas with dots
-                const normalizedValue = normalizeDecimal(input.value);
-                if (input.id === 'max_tokens' || input.id === 'top_k') {
-                    let intVal = parseInt(normalizedValue);
-                    intVal = clampValue(intVal, parseInt(input.min), parseInt(input.max));
-                    input.value = intVal;
-                    generationParameters[input.id] = intVal;
-                } else {
-                    let floatVal = parseFloat(normalizedValue);
-                    if (input.min && input.max) {
-                        floatVal = clampValue(floatVal, parseFloat(input.min), parseFloat(input.max));
-                        input.value = floatVal;
+                // Only perform basic normalization and validation during editing
+                // Don't replace empty values - we'll handle that on close
+                if (input.value.trim() !== '') {
+                    const normalizedValue = normalizeDecimal(input.value);
+                    if (input.id === 'max_tokens' || input.id === 'top_k') {
+                        let intVal = parseInt(normalizedValue);
+                        if (!isNaN(intVal)) {
+                            generationParameters[input.id] = intVal;
+                        }
+                    } else {
+                        let floatVal = parseFloat(normalizedValue);
+                        if (!isNaN(floatVal)) {
+                            generationParameters[input.id] = floatVal;
+                        }
                     }
-                    generationParameters[input.id] = floatVal;
+                    localStorage.setItem('generationParameters', JSON.stringify(generationParameters));
                 }
-                localStorage.setItem('generationParameters', JSON.stringify(generationParameters));
                 validateCreatePresetButton();
             });
         });
 
         newPresetNameInput.addEventListener('input', () => {
             validateCreatePresetButton();
+        });
+
+        modelSelect.addEventListener('change', () => {
+            selectedModel = modelSelect.value;
+            localStorage.setItem('selectedModel', selectedModel);
         });
 
         window.addEventListener('load', () => {
@@ -1532,6 +1571,11 @@
                     }
                 }
                 generationParameters = params;
+            }
+            currentPresetName = localStorage.getItem('selectedPreset') || 'Default';
+            const savedModel = localStorage.getItem('selectedModel');
+            if (savedModel) {
+                setSelectedModel(savedModel);
             }
             populatePresetSelect();
             validateCreatePresetButton();
