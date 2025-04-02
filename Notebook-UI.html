@@ -581,7 +581,7 @@
                     </div>
                     <div class="parameter-row">
                         <label for="top_k" class="parameter-label">Top K</label>
-                        <input type="number" id="top_k" class="parameter-input">
+                        <input type="number" id="top_k" class="parameter-input" min="-1" max="200" step="1">
                     </div>
                     <div class="parameter-row">
                         <label for="min_p" class="parameter-label">Min P</label>
@@ -644,7 +644,7 @@
                 "max_tokens": 222.0,
                 "temperature": 0.8,
                 "top_p": 0.9,
-                "top_k": 100.0,
+                "top_k": 100,
                 "min_p": 0.02,
                 "repetition_penalty": 1.0,
                 "presence_penalty": 0.66
@@ -689,7 +689,7 @@
                 "max_tokens": 222.0,
                 "temperature": 0.73,
                 "top_p": 0.92,
-                "top_k": 100.0,
+                "top_k": 100,
                 "min_p": 0.02,
                 "repetition_penalty": 1.01,
                 "presence_penalty": 0.35
@@ -698,7 +698,7 @@
                 "max_tokens": 222.0,
                 "temperature": 1.08,
                 "top_p": 1.0,
-                "top_k": -1.0,
+                "top_k": -1,
                 "min_p": 0.02,
                 "repetition_penalty": 1.0,
                 "presence_penalty": 0.0
@@ -707,7 +707,7 @@
                 "max_tokens": 222.0,
                 "temperature": 0.8,
                 "top_p": 0.77,
-                "top_k": -1.0,
+                "top_k": -1,
                 "min_p": 0.02,
                 "repetition_penalty": 1.0,
                 "presence_penalty": 1.0
