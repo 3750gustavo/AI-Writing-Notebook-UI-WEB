@@ -741,6 +741,9 @@
             return value.toString().replace(/,/g, '.');
         };
 
+        // Add helper for clamping numbers within min and max
+        const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
+
         const setTheme = (theme) => {
             document.body.classList.toggle('dark-theme', theme === 'dark');
         };
@@ -1103,7 +1106,17 @@
                 if (inputElement) {
                     // Normalize the value before sending
                     const normalizedValue = normalizeDecimal(inputElement.value);
-                    paramsToSend[key] = parseFloat(normalizedValue);
+                    if (key === 'max_tokens' || key === 'top_k') {
+                        let intVal = parseInt(normalizedValue);
+                        intVal = clampValue(intVal, parseInt(inputElement.min), parseInt(inputElement.max));
+                        paramsToSend[key] = intVal;
+                    } else {
+                        let floatVal = parseFloat(normalizedValue);
+                        if (inputElement.min && inputElement.max) {
+                            floatVal = clampValue(floatVal, parseFloat(inputElement.min), parseFloat(inputElement.max));
+                        }
+                        paramsToSend[key] = floatVal;
+                    }
                 }
             }
             return paramsToSend;
@@ -1475,7 +1488,19 @@
             input.addEventListener('input', () => {
                 // Normalize the value by replacing commas with dots
                 const normalizedValue = normalizeDecimal(input.value);
-                generationParameters[input.id] = parseFloat(normalizedValue);
+                if (input.id === 'max_tokens' || input.id === 'top_k') {
+                    let intVal = parseInt(normalizedValue);
+                    intVal = clampValue(intVal, parseInt(input.min), parseInt(input.max));
+                    input.value = intVal;
+                    generationParameters[input.id] = intVal;
+                } else {
+                    let floatVal = parseFloat(normalizedValue);
+                    if (input.min && input.max) {
+                        floatVal = clampValue(floatVal, parseFloat(input.min), parseFloat(input.max));
+                        input.value = floatVal;
+                    }
+                    generationParameters[input.id] = floatVal;
+                }
                 localStorage.setItem('generationParameters', JSON.stringify(generationParameters));
                 validateCreatePresetButton();
             });
