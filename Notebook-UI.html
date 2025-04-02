@@ -1349,7 +1349,7 @@
             } else if (target.closest('#settings-button')) {
                 showDialog(settingsDialog);
             } else if (target.id === 'connect-confirm') {
-                apiUrl = apiURLInput.value;
+                apiUrl = apiURLInput.value.replace(/\/+$/, ''); // Remove trailing slashes
                 apiKey = apiKEYInput.value;
                 localStorage.setItem('apiUrl', apiUrl);
                 localStorage.setItem('apiKey', apiKey);
@@ -1486,7 +1486,7 @@
         });
 
         window.addEventListener('load', () => {
-            apiUrl = localStorage.getItem('apiUrl') || '';
+            apiUrl = (localStorage.getItem('apiUrl') || '').replace(/\/+$/, '');
             apiKey = localStorage.getItem('apiKey') || '';
             apiURLInput.value = apiUrl;
             apiKEYInput.value = apiKey;
