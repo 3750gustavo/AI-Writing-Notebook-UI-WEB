@@ -569,15 +569,15 @@
                     </div>
                     <div class="parameter-row">
                         <label for="max_tokens" class="parameter-label">Max Tokens</label>
-                        <input type="number" id="max_tokens" class="parameter-input">
+                        <input type="number" id="max_tokens" class="parameter-input" min="1" max="8196" step="50">
                     </div>
                     <div class="parameter-row">
                         <label for="temperature" class="parameter-label">Temperature</label>
-                        <input type="number" id="temperature" class="parameter-input">
+                        <input type="number" id="temperature" class="parameter-input" min="0.00" max="2.00" step="0.01">
                     </div>
                     <div class="parameter-row">
                         <label for="top_p" class="parameter-label">Top P</label>
-                        <input type="number" id="top_p" class="parameter-input">
+                        <input type="number" id="top_p" class="parameter-input" min="0.00" max="1.00" step="0.01">
                     </div>
                     <div class="parameter-row">
                         <label for="top_k" class="parameter-label">Top K</label>
@@ -585,15 +585,15 @@
                     </div>
                     <div class="parameter-row">
                         <label for="min_p" class="parameter-label">Min P</label>
-                        <input type="number" id="min_p" class="parameter-input">
+                        <input type="number" id="min_p" class="parameter-input" min="0.00" max="1.00" step="0.01">
                     </div>
                     <div class="parameter-row">
                         <label for="repetition_penalty" class="parameter-label">Repetition Penalty</label>
-                        <input type="number" id="repetition_penalty" class="parameter-input">
+                        <input type="number" id="repetition_penalty" class="parameter-input" min="0.00" max="2.00" step="0.01">
                     </div>
                     <div class="parameter-row">
                         <label for="presence_penalty" class="parameter-label">Presence Penalty</label>
-                        <input type="number" id="presence_penalty" class="parameter-input">
+                        <input type="number" id="presence_penalty" class="parameter-input" min="-2.00" max="2.00" step="0.01">
                     </div>
                     <div class="preset-import-export">
                         <button id="export-presets-button">Export Presets</button>
